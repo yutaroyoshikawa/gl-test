@@ -2,17 +2,17 @@ import { glsl } from "../utils/temlates";
 
 export const vert = glsl`
 attribute vec3 position;
-uniform   mat4 mvpMatrix;
+uniform mat4 mvpMatrix;
 
 void main(void){
-  gl_Position = mvpMatrix * vec4(position, 1.0);
+  gl_Position = mvpMatrix * vec4(position, 1.);
 }
 `;
 
 export const frag = glsl`
-precision mediump float;
+precision highp float;
 
 void main(void){
-  gl_FragColor = vec4(0.0, 0.0, 0.0, 1.);
+  gl_FragColor = vec4(1.0, 1.0, 1.0, 1.);
 }
 `;
