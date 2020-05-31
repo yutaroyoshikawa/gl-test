@@ -5,9 +5,9 @@ import { vert, frag } from "../shaders/home";
 import { GL } from "../utils/gl";
 
 const vertexPosition = new Matrix3x3(
-  0.0, 2.0, 0.0,
-  2.0, 0.0, 0.0,
-  -2.0, 0.0, 0.0
+  0.0, 3.0, 0.0,
+  3.0, 0.0, 0.0,
+  -3.0, 0.0, 0.0
 );
 
 const colors = new Float32Array([
@@ -29,7 +29,7 @@ const Canvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || height === 0 || width === 0) return;
     const ctx = canvasRef.current.getContext("webgl2");
     if (!ctx) return;
 
@@ -87,7 +87,7 @@ const Canvas: React.FC = () => {
     }
 
     renderingGL();
-  }, []);
+  }, [width, height, canvasRef]);
 
   return (
     <>
