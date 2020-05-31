@@ -18,6 +18,8 @@ const colors = new Float32Array([
 
 const model = Matrix4.identity();
 
+const now = new Date().getTime();
+
 const camera = new Vector3(0.0, 1.0, 3.0);
 const lookAt = new Vector3(0, 0, 0);
 const cameraUpDirection = new Vector3(0, 1, 0);
@@ -61,8 +63,6 @@ const Canvas: React.FC = () => {
         ctx.enableVertexAttribArray(attLocation);
         ctx.vertexAttribPointer(attLocation, 3, ctx.FLOAT, false, 0, 0);
 
-        const uniLocation = ctx.getUniformLocation(GLProgram, "mvpMatrix");
-
         const perspective = Matrix4.perspective({
           fovYRadian: 90,
           aspectRatio: width / height,
@@ -73,9 +73,13 @@ const Canvas: React.FC = () => {
         const mvp = perspective.mulByMatrix4(view)
           .mulByMatrix4(model);
 
+        const uniLocation = ctx.getUniformLocation(GLProgram, "mvpMatrix");
         ctx.uniformMatrix4fv(uniLocation, false, mvp.values);
 
+        const uniTime = ctx.getUniformLocation(GLProgram, "time");
+
         const renderLoop = () => {
+          ctx.uniform1f(uniTime, (new Date().getTime() - now) * 0.001);
           renderer.renderGl();
           requestAnimationFrame(renderLoop);
         }

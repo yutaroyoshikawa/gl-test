@@ -12,7 +12,9 @@ void main(void){
 export const frag = glsl`
 precision highp float;
 
+uniform float time;
+
 void main(void){
-  gl_FragColor = vec4(1.0, 1.0, 1.0, 1.);
+  gl_FragColor = vec4(1.0, 1.0, sin(time), 1.);
 }
 `;
