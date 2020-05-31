@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import { Matrix4, Vector3, Matrix3x3 } from "matrixgl";
 import { useViewPort } from "../hooks/viewPort";
+// import { useMouse } from "../hooks/mouse";
 import { vert, frag } from "../shaders/home";
 import { GL } from "../utils/gl";
 
@@ -26,12 +27,34 @@ const cameraUpDirection = new Vector3(0, 1, 0);
 
 const view = Matrix4.lookAt(camera, lookAt, cameraUpDirection);
 
+let anim: ReturnType<typeof requestAnimationFrame>;
+
+let xIndex = 0;
+let yIndex = 0;
+
 const Canvas: React.FC = () => {
   const { width, height } = useViewPort();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (!canvasRef.current || height === 0 || width === 0) return;
+    if (!canvasRef.current) return;
+
+    const callback = (event: MouseEvent) => {
+      xIndex = event.clientX;
+      yIndex = event.clientY;
+    }
+
+    canvasRef.current.addEventListener("mousemove", callback);
+
+    return () => {
+      if (!canvasRef.current) return;
+
+      canvasRef.current.removeEventListener("mousemove", callback);
+    }
+  }, [canvasRef]);
+
+  useEffect(() => {
+    if (!canvasRef.current || height === 0 || width === 0 || anim !== undefined) return;
     const ctx = canvasRef.current.getContext("webgl2");
     if (!ctx) return;
 
@@ -76,12 +99,15 @@ const Canvas: React.FC = () => {
         const uniLocation = ctx.getUniformLocation(GLProgram, "mvpMatrix");
         ctx.uniformMatrix4fv(uniLocation, false, mvp.values);
 
-        const uniTime = ctx.getUniformLocation(GLProgram, "time");
-
         const renderLoop = () => {
+          const uniTime = ctx.getUniformLocation(GLProgram, "time");
           ctx.uniform1f(uniTime, (new Date().getTime() - now) * 0.001);
+
+          const uniMouse = ctx.getUniformLocation(GLProgram, "mouse");
+          ctx.uniform2fv(uniMouse, [xIndex / width, yIndex / height]);
+
           renderer.renderGl();
-          requestAnimationFrame(renderLoop);
+          anim = requestAnimationFrame(renderLoop);
         }
 
         renderLoop();
@@ -91,6 +117,10 @@ const Canvas: React.FC = () => {
     }
 
     renderingGL();
+
+    return () => {
+      cancelAnimationFrame(anim);
+    }
   }, [width, height, canvasRef]);
 
   return (
