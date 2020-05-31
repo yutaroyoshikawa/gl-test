@@ -1,8 +1,8 @@
 export class GL {
-  private ctx: WebGLRenderingContext;
+  private ctx: WebGL2RenderingContext;
   private GLProgram: WebGLProgram | null = null;
 
-  constructor(ctx: WebGLRenderingContext) {
+  constructor(ctx: WebGL2RenderingContext) {
     this.ctx = ctx;
   }
 
@@ -42,6 +42,8 @@ export class GL {
   });
 
   public renderGl = () => {
+    this.ctx.clear(this.ctx.COLOR_BUFFER_BIT | this.ctx.DEPTH_BUFFER_BIT);
+    this.ctx.drawArrays(this.ctx.TRIANGLES, 0, 3);
     this.ctx.flush();
   };
 
@@ -65,6 +67,29 @@ export class GL {
 
     return vbo;
   };
+
+  public createVertexArray(dataArray: Float32Array[], locations: number[], sizes: number[]){
+    // WebGLVertexArrayObjectを生成する
+    const vao = this.ctx.createVertexArray()
+    // WebGLVertexArrayObjectをバインドする
+    this.ctx.bindVertexArray(vao);
+    // 配列データからWebGLBufferを作成し、attributeに割り当てる
+    for(let i = 0,e = dataArray.length;i < e;++i){
+        // WebGLBufferの生成
+        let vbo = this.ctx.createBuffer();
+        // WebGLBufferのバインド
+        this.ctx.bindBuffer(this.ctx.ARRAY_BUFFER, vbo);
+        // WebGLBufferにデータを設定する
+        this.ctx.bufferData(this.ctx.ARRAY_BUFFER, dataArray[i], this.ctx.STATIC_DRAW);
+        // locationのattributeを有効にする
+        this.ctx.enableVertexAttribArray(locations[i]);
+        // locationのattributeにWebGLBufferを割り当てる
+        this.ctx.vertexAttribPointer(locations[i], sizes[i], this.ctx.FLOAT, false, 0, 0);
+    }
+    // WebGLVertexArrayObjectのバインドを解除
+    this.ctx.bindVertexArray(null);
+    return vao;
+}
 
   get program () {
     return this.GLProgram;
